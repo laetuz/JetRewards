@@ -63,4 +63,9 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    //Koin
+    def koin_version = "3.2.0"
+    implementation "io.insert-koin:koin-androidx-compose:$koin_version"
+    implementation "io.insert-koin:koin-core:$koin_version"
 }
