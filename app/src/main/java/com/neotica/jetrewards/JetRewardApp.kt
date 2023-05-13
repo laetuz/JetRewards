@@ -18,14 +18,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import androidx.navigation.navArgument
 import com.neotica.jetrewards.ui.navigation.NavigationItem
 import com.neotica.jetrewards.ui.navigation.Screen
 import com.neotica.jetrewards.ui.screen.cart.CartScreen
+import com.neotica.jetrewards.ui.screen.detail.DetailScreen
 import com.neotica.jetrewards.ui.screen.home.HomeScreen
 import com.neotica.jetrewards.ui.screen.profile.ProfileScreen
 import com.neotica.jetrewards.ui.theme.JetRewardsTheme
@@ -36,15 +39,30 @@ fun JetRewardApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
+   // NavGraph.create(navController)
     val graph = navController.createGraph(startDestination = Screen.Home.route) {
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                navigateToDetail = {
+                    navController.navigate(Screen.DetailReward.createRoute(it))
+                }
+            )
         }
         composable(Screen.Cart.route) {
             CartScreen()
         }
         composable(Screen.Profile.route) {
             ProfileScreen()
+        }
+        composable(
+            route = Screen.DetailReward.route,
+            arguments = listOf(navArgument("rewardId") { type = NavType.LongType })
+        ) {
+            val id = it.arguments?.getLong("rewardId") ?: -1L
+            DetailScreen(
+                rewardId = id,
+                navigateBack = { navController.navigateUp() },
+                navigateToCart = {  })
         }
     }
     Scaffold(
