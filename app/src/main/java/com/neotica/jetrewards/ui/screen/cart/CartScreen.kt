@@ -9,12 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -36,7 +32,6 @@ import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun CartScreen(
-    modifier: Modifier = Modifier,
     viewModel: CartViewModel = getViewModel()
 ) {
     viewModel.uiState.collectAsState(initial = UiState.Loading).value.let {
@@ -47,11 +42,10 @@ fun CartScreen(
 
             is UiState.Success -> {
                 CartContent(
-                    state = it.data,
-                    onProductCountChanged = { rewardId, count ->
-                        viewModel.updateOrderReward(rewardId, count)
-                    }
-                )
+                    state = it.data
+                ) { rewardId, count ->
+                    viewModel.updateOrderReward(rewardId, count)
+                }
             }
 
             is UiState.Error -> {
@@ -65,8 +59,7 @@ fun CartScreen(
 @Composable
 fun CartContent(
     state: CartState,
-    onProductCountChanged: (id: Long, count: Int) -> Unit,
-    modifier: Modifier = Modifier
+    onProductCountChanged: (id: Long, count: Int) -> Unit
 ) {
     val listState = rememberLazyListState()
     Column(
@@ -74,9 +67,9 @@ fun CartContent(
     ) {
         Scaffold(
             topBar = {
-                TopBarCart {}
+                TopBarCart()
             }
-        ) {
+        ) {it ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -96,13 +89,13 @@ fun CartContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ){
-                    items(state.orderReward, key = {it.reward.id}) {
+                    items(state.orderReward, key = {it.reward.id}) {lazy ->
                         CartItem(
-                            rewardId = it.reward.id,
-                            image = it.reward.image,
-                            title = it.reward.title,
-                            totalPoint = it.reward.requiredPoint,
-                            count = it.count,
+                            rewardId = lazy.reward.id,
+                            image = lazy.reward.image,
+                            title = lazy.reward.title,
+                            totalPoint = lazy.reward.requiredPoint,
+                            count = lazy.count,
                             onProductCountChanged = onProductCountChanged
                         )
                         Divider()
@@ -122,7 +115,7 @@ fun CartContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarCart(onMenuClick: () -> Unit) {
+fun TopBarCart() {
     TopAppBar(
         title = { Text(text = stringResource(id = R.string.app_name)) }
     )
