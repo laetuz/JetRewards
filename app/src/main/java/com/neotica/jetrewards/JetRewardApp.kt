@@ -39,7 +39,8 @@ fun JetRewardApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-   // NavGraph.create(navController)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     val graph = navController.createGraph(startDestination = Screen.Home.route) {
         composable(Screen.Home.route) {
             HomeScreen(
@@ -62,11 +63,20 @@ fun JetRewardApp(
             DetailScreen(
                 rewardId = id,
                 navigateBack = { navController.navigateUp() },
-                navigateToCart = {  })
+                navigateToCart = {
+                    navController.popBackStack()
+                    navController.navigate(Screen.Cart.route){
+                        popUpTo(navController.graph.findStartDestination().id){saveState = true}
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
         }
     }
     Scaffold(
-        bottomBar = { BottomBar(navController, modifier) },
+        bottomBar = { if (currentRoute!=Screen.DetailReward.route) {
+            BottomBar(navController, modifier)
+        } },
         modifier = modifier
     ) {
         NavHost(
