@@ -32,7 +32,8 @@ import org.koin.androidx.compose.getViewModel
 
 @Composable
 fun CartScreen(
-    viewModel: CartViewModel = getViewModel()
+    viewModel: CartViewModel = getViewModel(),
+    orderButtonClicked: (String) -> Unit
 ) {
     viewModel.uiState.collectAsState(initial = UiState.Loading).value.let {
         when (it) {
@@ -42,10 +43,12 @@ fun CartScreen(
 
             is UiState.Success -> {
                 CartContent(
-                    state = it.data
-                ) { rewardId, count ->
-                    viewModel.updateOrderReward(rewardId, count)
-                }
+                    state = it.data,
+                    onOrderButtonClicked = orderButtonClicked,
+                    onProductCountChanged = { rewardId, count ->
+                        viewModel.updateOrderReward(rewardId, count)
+                    }
+                )
             }
 
             is UiState.Error -> {
@@ -59,9 +62,15 @@ fun CartScreen(
 @Composable
 fun CartContent(
     state: CartState,
-    onProductCountChanged: (id: Long, count: Int) -> Unit
+    onProductCountChanged: (id: Long, count: Int) -> Unit,
+    onOrderButtonClicked: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
+    val shareMessage = stringResource(
+        R.string.share_message,
+        state.orderReward.count(),
+        state.totalRequiredPoint
+    )
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -104,7 +113,7 @@ fun CartContent(
                 OrderButton(
                     text = stringResource(R.string.total_order, state.totalRequiredPoint),
                     enabled = state.orderReward.isNotEmpty(),
-                    onClick = {},
+                    onClick = {onOrderButtonClicked(shareMessage)},
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -125,6 +134,6 @@ fun TopBarCart() {
 @Composable
 fun CartPreview() {
     JetRewardsTheme {
-        CartScreen()
+     //   CartScreen()
     }
 }
